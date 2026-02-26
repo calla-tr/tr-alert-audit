@@ -746,6 +746,7 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="#summary">Summary</a>
+    <a href="#usage">Usage Analysis</a>
     <a href="#chainlink">Chainlink DS</a>
     <a href="#gap-analysis">Gap Analysis</a>
     <a href="#toasts">Toasts</a>
@@ -885,6 +886,347 @@
         </tr>
       </tbody>
     </table>
+  </section>
+
+
+  <!-- ==================== USAGE ANALYSIS ==================== -->
+  <section class="section" id="usage">
+    <div class="section-header">
+      <div class="section-number" style="background:var(--green);">&#10003;</div>
+      <h2>Usage Analysis — Active vs. Dead Code</h2>
+    </div>
+    <p class="section-desc">Every alert component checked for import count, last modified date, and whether it's actually rendered. Components are classified as Active, Low Usage, Legacy, or Dead.</p>
+
+    <!-- Legend -->
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;"><span style="width:12px;height:12px;border-radius:2px;background:var(--green);display:inline-block;"></span> Active — Used, recently modified</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;"><span style="width:12px;height:12px;border-radius:2px;background:var(--yellow1);display:inline-block;"></span> Low Usage — 1-2 consumers, works but narrow</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;"><span style="width:12px;height:12px;border-radius:2px;background:var(--grey7);display:inline-block;"></span> Legacy — Still rendered but very stale</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;"><span style="width:12px;height:12px;border-radius:2px;background:var(--red2);display:inline-block;"></span> Dead — Zero imports, safe to delete</div>
+    </div>
+
+    <!-- DEAD CODE -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--red2);border-radius:8px;padding:24px;margin-bottom:24px;">
+      <h4 style="color:var(--red2);margin-bottom:4px;">Dead Code — Safe to Remove</h4>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">These components have zero imports or their entire import chain is unreachable. They can be deleted.</p>
+      <table class="summary-table" style="margin:0;">
+        <thead><tr><th>Component</th><th>Repo</th><th>Imports</th><th>Last Modified</th><th>Why It's Dead</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--white);">Notification.tsx <span style="font-size:11px;color:var(--text-muted);">(web common-react)</span></td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td style="color:var(--red2);font-weight:700;">0</td>
+            <td>Mar 2023</td>
+            <td>Not imported by any file. Completely orphaned.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">WorkoutProgressionsBanner.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td style="color:var(--red2);font-weight:700;">0 reachable</td>
+            <td>May 2023</td>
+            <td>Only consumer (WorkoutProgressionsBannerRoot) is itself never imported. Entire chain is dead.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">GroupWorkoutBannerAnnouncement.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td style="color:var(--red2);font-weight:700;">0</td>
+            <td>Jun 2024</td>
+            <td>Exported but never imported. Removed from AllWorkoutsView but file left behind.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LEGACY -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--grey7);border-radius:8px;padding:24px;margin-bottom:24px;">
+      <h4 style="color:var(--grey9);margin-bottom:4px;">Legacy — Still Rendered but Stale</h4>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">These components are still reachable in production but haven't been touched in 1-4+ years. Candidates for migration or removal.</p>
+      <table class="summary-table" style="margin:0;">
+        <thead><tr><th>Component</th><th>Repo</th><th>Imports</th><th>Last Modified</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--white);">toaster.component.ts <span style="font-size:11px;color:var(--text-muted);">(Angular)</span></td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>1</td>
+            <td>Sep 2025</td>
+            <td>Registered in Angular shared module. Superseded by React Pills toast system.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">ModalService.tsx</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>4</td>
+            <td style="color:var(--yellow1);">Mar 2023</td>
+            <td>IoC-based pattern, not modified in ~3 years. Still used by PlanBuilder, ETss, MCT modals.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">UpdateNotification.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>2</td>
+            <td style="color:var(--yellow1);">Feb 2022</td>
+            <td>4+ years old. Only Admin panel and GroupWorkout update required.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">CopyingNotification.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>1</td>
+            <td style="color:var(--yellow1);">Feb 2022</td>
+            <td>4+ years old. Only MonthView. Still rendered but untouched.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">SettingNotification.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>2</td>
+            <td style="color:var(--red5);">Apr 2021</td>
+            <td>5+ years old. Only DisableBluetoothField. Very narrow scope.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">SimpleErrorWrapper.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>4</td>
+            <td style="color:var(--red5);">Mar 2020</td>
+            <td>6+ years old. Only GroupWorkout-related files.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">WorkoutCreatorBanner.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>1</td>
+            <td>Jun 2024</td>
+            <td>Consumer (CustomWorkoutsView/index.tsx) untouched since 2020.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LOW USAGE -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--yellow1);border-radius:8px;padding:24px;margin-bottom:24px;">
+      <h4 style="color:var(--yellow1);margin-bottom:4px;">Low Usage — Functional but Limited</h4>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">1-3 consumers. Working correctly but may be consolidation candidates.</p>
+      <table class="summary-table" style="margin:0;">
+        <thead><tr><th>Component</th><th>Repo</th><th>Imports</th><th>Last Modified</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--white);">GenericError.tsx <span style="font-size:11px;color:var(--text-muted);">(AI FTP)</span></td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>1</td>
+            <td>Aug 2025</td>
+            <td>Only CannotUseAiFtp.tsx. Could be inlined.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">SaveMessage.tsx <span style="font-size:11px;color:var(--text-muted);">(web)</span></td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>3</td>
+            <td>Jul 2025</td>
+            <td>ETssForm, EmailPreferences, ErrorWrapper. Could use toast instead.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">WahooResyncBanner.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>1</td>
+            <td>May 2025</td>
+            <td>Single consumer chain. Feature-specific.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">SimpleModal.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>2</td>
+            <td>Mar 2025</td>
+            <td>Only ErrorBoundary and CustomPlanReview. Could migrate to Chainlink Modal.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">WahooUpdateModal.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>1</td>
+            <td>May 2025</td>
+            <td>Single consumer (Career/index.tsx). Feature-specific.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">AudioVideoNotification.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>1</td>
+            <td style="color:var(--yellow1);">Feb 2022</td>
+            <td>Only GroupWorkoutPlayer. Also stale (2022).</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">WorkoutPlayerNotification.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>1</td>
+            <td>Jul 2024</td>
+            <td>Only consumed by AudioVideoNotification. Wrapper layer.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ACTIVE — Full table -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:8px;padding:24px;margin-bottom:24px;">
+      <h4 style="color:var(--green);margin-bottom:4px;">Active — In Use</h4>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">These are actively used, recently maintained, and core to the product.</p>
+      <table class="summary-table" style="margin:0;">
+        <thead><tr><th>Component</th><th>Repo</th><th>Imports</th><th>Last Modified</th><th>Scope</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--white);">Drawer system (core/drawer)</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td style="font-weight:700;color:var(--green);">92</td>
+            <td>Jan 2026</td>
+            <td>Core UI infrastructure — most-used component</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">Mobile BasicModal.tsx</td>
+            <td><span class="tag platform-mobile">Mobile</span></td>
+            <td style="font-weight:700;color:var(--green);">39</td>
+            <td>Dec 2025</td>
+            <td>Core mobile modal — used across entire app</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">ErrorWrapper.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td style="font-weight:700;color:var(--green);">35</td>
+            <td>Mar 2025</td>
+            <td>Core form error pattern</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">FullscreenModal</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td style="font-weight:700;color:var(--green);">22</td>
+            <td>Mar 2025</td>
+            <td>AI FTP, post-workout, RPE — core flows</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">FormikErrorMessage.tsx</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td style="font-weight:700;color:var(--green);">19</td>
+            <td>Jan 2025</td>
+            <td>All Formik-powered forms</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">BannerNotification.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td style="font-weight:700;color:var(--green);">19</td>
+            <td>Jan 2025</td>
+            <td>Calendar, Career, Workouts views</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">Toast service (Pills)</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td style="font-weight:700;color:var(--green);">18</td>
+            <td>Feb 2026</td>
+            <td>Global toast system — profile, calendar, settings</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">Notification.tsx (desktop)</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td style="font-weight:700;">18</td>
+            <td>Jul 2024</td>
+            <td>Core notification primitive across desktop</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">SidePanelModal.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td style="font-weight:700;">15</td>
+            <td>Jul 2024</td>
+            <td>Workout/activity/event details, forms</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">ErrorMessage.tsx</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td style="font-weight:700;">13</td>
+            <td>Feb 2026</td>
+            <td>Forms, pages, admin tools</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">SaveMessage.tsx (desktop)</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>11</td>
+            <td>Nov 2024</td>
+            <td>Forms across workout details, activities, settings</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">PageErrorMessage.tsx</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>10</td>
+            <td>Mar 2023</td>
+            <td>Page-level error states (stable, not stale)</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">A11y Announcement service</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>10</td>
+            <td>Feb 2026</td>
+            <td>Global screen reader infrastructure</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">EstimateTssBanner.tsx</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>9</td>
+            <td>Feb 2026</td>
+            <td>Activity pages (cycling, running, cards)</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">DrawerConfirmation.tsx</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>9</td>
+            <td>Jan 2026</td>
+            <td>All calendar delete confirmations</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">ScheduleCallBanner.tsx</td>
+            <td><span class="tag platform-web">Web</span></td>
+            <td>8</td>
+            <td>Dec 2025</td>
+            <td>Onboarding, refund, cancel pages</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">Mobile Notification.tsx</td>
+            <td><span class="tag platform-mobile">Mobile</span></td>
+            <td>8</td>
+            <td>Mar 2025</td>
+            <td>Calendar, settings, events, devices</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">RecurringConfirmation.tsx</td>
+            <td><span class="tag platform-desktop">Desktop</span></td>
+            <td>7</td>
+            <td>Jul 2025</td>
+            <td>Calendar scheduling, workout forms</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">RedDayAlertModal.tsx</td>
+            <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span></td>
+            <td>3 + 6</td>
+            <td>Jun 2025</td>
+            <td>Calendar footers, workout details, add activity</td>
+          </tr>
+          <tr>
+            <td style="color:var(--white);">+ 10 more active</td>
+            <td></td>
+            <td>1-5 each</td>
+            <td>2025-2026</td>
+            <td>Banners, adapt modals, error boundaries, AI features</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Quick Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:8px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:700;color:var(--green);">33</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Active</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:700;color:var(--yellow1);">7</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Low Usage</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:700;color:var(--grey7);">7</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Legacy</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:700;color:var(--red2);">3</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Dead Code</div>
+      </div>
+    </div>
   </section>
 
 
