@@ -1,0 +1,3031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrainerRoad Alert Audit</title>
+  <style>
+    :root {
+      /* TR Color Palette */
+      --grey1: #1d1d1d;
+      --grey2: #252525;
+      --grey3: #2e2e2e;
+      --grey4: #373737;
+      --grey5: #3f3f3f;
+      --grey6: #505050;
+      --grey7: #6a6a6a;
+      --grey8: #838383;
+      --grey9: #9d9d9d;
+      --grey10: #b6b6b6;
+      --grey11: #d0d0d0;
+      --grey12: #e0e0e0;
+      --grey13: #e9e9e9;
+      --grey14: #f1f1f1;
+      --grey15: #fafafa;
+      --white: #ffffff;
+      --red1: #801810;
+      --red2: #da291c;
+      --red3: #e53f33;
+      --red5: #ff5e5e;
+      --green: #439f1f;
+      --green-hover: #5bb836;
+      --blue3: #1482c8;
+      --blue4: #1795dc;
+      --yellow1: #fbb000;
+      --yellow2: #fac800;
+
+      /* Audit site palette */
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #222222;
+      --border: #333333;
+      --text: #e0e0e0;
+      --text-muted: #888888;
+      --accent: #da291c;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ---- HEADER ---- */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .header h1 span { color: var(--accent); }
+    .header-stats {
+      display: flex;
+      gap: 24px;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ---- NAV ---- */
+    .nav {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 0;
+      overflow-x: auto;
+      position: sticky;
+      top: 93px;
+      z-index: 99;
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      gap: 0;
+    }
+    .nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .nav a:hover {
+      color: var(--white);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ---- MAIN CONTENT ---- */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 32px;
+    }
+
+    /* ---- SECTION ---- */
+    .section {
+      margin-bottom: 64px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .section-number {
+      background: var(--accent);
+      color: var(--white);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+      margin-left: 40px;
+    }
+
+    /* ---- ALERT CARD ---- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .card-top {
+      display: flex;
+      gap: 0;
+    }
+    .card-preview {
+      width: 420px;
+      min-height: 160px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--grey2);
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .card-info {
+      flex: 1;
+      padding: 24px;
+    }
+    .card-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .card-type {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-bottom: 12px;
+    }
+    .type-toast { background: #439f1f33; color: var(--green); }
+    .type-banner { background: #1482c833; color: var(--blue3); }
+    .type-modal { background: #da291c33; color: var(--red2); }
+    .type-inline { background: #fbb00033; color: var(--yellow1); }
+    .type-form { background: #9d9d9d33; color: var(--grey9); }
+    .type-status { background: #1795dc33; color: var(--blue4); }
+    .type-a11y { background: #5bb83633; color: var(--green-hover); }
+    .type-error { background: #80181033; color: var(--red5); }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .card-meta dt {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .card-meta dd {
+      color: var(--text);
+      margin-top: 2px;
+    }
+    .card-bottom {
+      border-top: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .card-bottom .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .tag.platform-web { border-color: #439f1f55; color: #7dc462; }
+    .tag.platform-desktop { border-color: #1482c855; color: #5eaadd; }
+    .tag.platform-mobile { border-color: #fbb00055; color: #fac800; }
+    .tag.deprecated { border-color: #da291c55; color: var(--red5); }
+
+    /* ---- MOCKUP STYLES ---- */
+
+    /* Toast Pills */
+    .mock-toast {
+      background: var(--grey3);
+      color: var(--white);
+      height: 54px;
+      border-radius: 27px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      max-width: 360px;
+    }
+    .mock-toast .icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mock-toast .icon.success { background: var(--green); }
+    .mock-toast .icon.error { background: var(--red2); }
+    .mock-toast .icon.info { background: var(--blue3); }
+    .mock-toast .action-btn {
+      margin-left: auto;
+      color: var(--blue3);
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    /* App Banners */
+    .mock-banner {
+      width: 100%;
+      padding: 8px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      text-align: center;
+      position: relative;
+    }
+    .mock-banner.light {
+      background: var(--grey14);
+      color: var(--grey1);
+    }
+    .mock-banner.dark {
+      background: var(--grey2);
+      color: var(--white);
+    }
+    .mock-banner .close-btn {
+      position: absolute;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-size: 16px;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .mock-banner .banner-btn {
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--grey11);
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Modals */
+    .mock-modal-wrapper {
+      width: 100%;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(21,21,21,0.5);
+      border-radius: 4px;
+      padding: 20px;
+    }
+    .mock-modal {
+      background: var(--grey3);
+      border-radius: 2px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+      max-width: 340px;
+      width: 100%;
+      position: relative;
+    }
+    .mock-modal.light {
+      background: var(--white);
+      color: var(--grey1);
+    }
+    .mock-modal .close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--grey8);
+      font-size: 14px;
+    }
+    .mock-modal .modal-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+    }
+    .mock-modal h4 {
+      font-size: 18px;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .mock-modal.light h4 { color: var(--grey1); }
+    .mock-modal p {
+      font-size: 14px;
+      color: var(--grey9);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .mock-modal .btn-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .mock-btn {
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .mock-btn.primary { background: var(--red2); color: var(--white); }
+    .mock-btn.secondary { background: var(--grey5); color: var(--white); }
+    .mock-btn.green { background: var(--green); color: var(--white); }
+
+    /* Inline Alerts */
+    .mock-inline {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .mock-inline.info-light {
+      background: var(--grey15);
+      border: 1px solid var(--grey11);
+      color: var(--grey4);
+    }
+    .mock-inline.info-dark {
+      background: var(--grey2);
+      border: 1px solid var(--grey6);
+      color: var(--grey10);
+    }
+    .mock-inline.warning {
+      background: rgba(251, 176, 0, 0.15);
+      border: 1px solid var(--yellow1);
+      color: var(--white);
+    }
+    .mock-inline .inline-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Error Messages */
+    .mock-error-msg {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      gap: 12px;
+      border-radius: 2px;
+    }
+    .mock-error-msg.light {
+      border: 1px solid var(--grey13);
+      box-shadow: 0px 8px 24px 0px rgba(0, 25, 50, 0.12);
+      background: var(--white);
+      color: var(--red1);
+    }
+    .mock-error-msg.dark {
+      border: 1px solid var(--grey4);
+      box-shadow: 0 4px 12px 0 rgba(0, 2, 5, 0.2);
+      background: var(--grey3);
+      color: var(--red5);
+    }
+    .mock-error-msg .err-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Notification bar (Electron) */
+    .mock-notif {
+      width: 100%;
+      padding: 12px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--white);
+      position: relative;
+    }
+    .mock-notif.success { background: var(--green); }
+    .mock-notif.error { background: var(--red1); }
+    .mock-notif.warning { background: var(--yellow1); color: var(--grey1); }
+    .mock-notif.update { background: var(--green); }
+    .mock-notif.resume { background: var(--blue3); }
+    .mock-notif.banner { background: var(--grey3); }
+    .mock-notif.info { background: var(--grey4); }
+
+    /* Form Error */
+    .mock-form-field {
+      width: 100%;
+      max-width: 300px;
+    }
+    .mock-form-field label {
+      font-size: 12px;
+      color: var(--grey9);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .mock-form-field input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--red2);
+      background: var(--grey3);
+      color: var(--white);
+      font-size: 14px;
+      outline: none;
+    }
+    .mock-form-field .field-error {
+      font-size: 12px;
+      color: var(--red2);
+      margin-top: 4px;
+    }
+
+    /* Save Message */
+    .mock-save {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mock-save .check { color: var(--green); font-size: 12px; }
+    .mock-save span { color: var(--green); font-size: 12px; font-weight: 500; }
+
+    /* Adaptations Pending */
+    .mock-adapt {
+      background: var(--white);
+      border-radius: 100px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      color: var(--grey4);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .mock-adapt .adapt-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mock-adapt .adapt-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .mock-adapt .preview-btn {
+      color: var(--grey1);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 4px;
+    }
+    .mock-adapt .preview-btn:hover { color: var(--grey7); }
+
+    /* Drawer */
+    .mock-drawer-wrapper {
+      width: 100%;
+      min-height: 200px;
+      display: flex;
+      justify-content: flex-end;
+      background: rgba(21,21,21,0.3);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .mock-drawer {
+      width: 280px;
+      background: var(--grey3);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .mock-drawer h4 {
+      font-size: 16px;
+      color: var(--white);
+    }
+    .mock-drawer p {
+      font-size: 13px;
+      color: var(--grey9);
+      line-height: 1.5;
+    }
+
+    /* Confirmation Dialog */
+    .mock-confirm {
+      text-align: center;
+      padding: 24px;
+    }
+    .mock-confirm .err-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+
+    /* ---- SUMMARY TABLE ---- */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+    }
+    .summary-table th, .summary-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .summary-table th {
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .summary-table td { color: var(--text); }
+    .summary-table tr:hover td { background: var(--surface2); }
+    .summary-table .count {
+      font-weight: 700;
+      color: var(--white);
+      font-size: 16px;
+    }
+
+    /* ---- RECOMMENDATIONS ---- */
+    .rec-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .rec-card.high { border-left: 4px solid var(--red2); }
+    .rec-card.medium { border-left: 4px solid var(--yellow1); }
+    .rec-card.low { border-left: 4px solid var(--green); }
+    .rec-card h4 {
+      font-size: 16px;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .rec-priority {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .rec-card.high .rec-priority { color: var(--red2); }
+    .rec-card.medium .rec-priority { color: var(--yellow1); }
+    .rec-card.low .rec-priority { color: var(--green); }
+    .rec-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .rec-card ul {
+      margin-top: 8px;
+      padding-left: 20px;
+    }
+    .rec-card li {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    /* ---- VARIANT ROW ---- */
+    .variant-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    /* Color swatch */
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 800px) {
+      .card-top { flex-direction: column; }
+      .card-preview { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      .header-inner { flex-direction: column; gap: 16px; }
+    }
+
+    /* Scroll offset for sticky nav */
+    [id] { scroll-margin-top: 140px; }
+
+    /* Toast variant container */
+    .toast-variants {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <h1><span>TrainerRoad</span> Alert Type Audit</h1>
+    <div class="header-stats">
+      <div class="stat">
+        <div class="stat-number">14</div>
+        <div class="stat-label">Alert Systems</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">38+</div>
+        <div class="stat-label">Components</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Platforms</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#summary">Summary</a>
+    <a href="#chainlink">Chainlink DS</a>
+    <a href="#gap-analysis">Gap Analysis</a>
+    <a href="#toasts">Toasts</a>
+    <a href="#banners">App Banners</a>
+    <a href="#modals">Modals</a>
+    <a href="#alert-modals">Alert Modals</a>
+    <a href="#inline">Inline Alerts</a>
+    <a href="#notifications">Notifications</a>
+    <a href="#form">Form Errors</a>
+    <a href="#confirmations">Confirmations</a>
+    <a href="#status">Status Indicators</a>
+    <a href="#drawers">Drawers</a>
+    <a href="#a11y">Accessibility</a>
+    <a href="#legacy">Legacy</a>
+    <a href="#recommendations">Recommendations</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ==================== SUMMARY ==================== -->
+  <section class="section" id="summary">
+    <div class="section-header">
+      <div class="section-number">&Sigma;</div>
+      <h2>Audit Summary</h2>
+    </div>
+    <p class="section-desc">Complete inventory of every alert-type pattern found across TrainerRoadWeb and TrainerRoadElectron (desktop + mobile).</p>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Count</th>
+          <th>Platforms</th>
+          <th>Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Toast Notifications (Pills)</td>
+          <td class="count">2</td>
+          <td><span class="tag platform-web">Web</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>Modern system, 4 variants (default, success, error, info)</td>
+        </tr>
+        <tr>
+          <td>App Banners</td>
+          <td class="count">3</td>
+          <td><span class="tag platform-web">Web</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>Schedule Call, Download Apps, Public Profile</td>
+        </tr>
+        <tr>
+          <td>Modal Dialogs</td>
+          <td class="count">6</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span> <span class="tag platform-mobile">Mobile</span></td>
+          <td><span class="tag">Mixed</span></td>
+          <td>Legacy + Chainlink + BaseModal + SimpleModal + FullscreenModal + SidePanelModal</td>
+        </tr>
+        <tr>
+          <td>Alert-Specific Modals</td>
+          <td class="count">8</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span> <span class="tag platform-mobile">Mobile</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>RedDay, AI FTP errors, Wahoo, Adapt Event, AI Workout Check, etc.</td>
+        </tr>
+        <tr>
+          <td>Inline Alerts / Info Boxes</td>
+          <td class="count">4</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>EstimateTssBanner, ListViewBanner, AlertBox, WorkoutProgressionsBanner</td>
+        </tr>
+        <tr>
+          <td>Notification Bars (Desktop)</td>
+          <td class="count">7</td>
+          <td><span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>7 type variants: success, error, warning, update, resume, banner, info</td>
+        </tr>
+        <tr>
+          <td>Form Validation Errors</td>
+          <td class="count">4</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>FormikErrorMessage, ErrorMessage, ErrorWrapper, SimpleErrorWrapper</td>
+        </tr>
+        <tr>
+          <td>Confirmation Dialogs</td>
+          <td class="count">5</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>DrawerConfirmation, RecurringConfirmation, Delete modals, GroupWorkout</td>
+        </tr>
+        <tr>
+          <td>Status/Pending Notifications</td>
+          <td class="count">3</td>
+          <td><span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>AdaptationsPending, CopyingNotification, SettingNotification</td>
+        </tr>
+        <tr>
+          <td>Drawer Panels</td>
+          <td class="count">2</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>Web Drawer system + Desktop SidePanel</td>
+        </tr>
+        <tr>
+          <td>Save Confirmations</td>
+          <td class="count">2</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>Identical SaveMessage component in both repos</td>
+        </tr>
+        <tr>
+          <td>Accessibility Announcements</td>
+          <td class="count">1</td>
+          <td><span class="tag platform-web">Web</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>Screen reader live region (visually hidden)</td>
+        </tr>
+        <tr>
+          <td>Error Boundaries</td>
+          <td class="count">4</td>
+          <td><span class="tag platform-web">Web</span> <span class="tag platform-desktop">Desktop</span></td>
+          <td><span class="tag">Active</span></td>
+          <td>App, Empty, Retry, Chart boundaries</td>
+        </tr>
+        <tr>
+          <td>Legacy Toaster (Angular)</td>
+          <td class="count">1</td>
+          <td><span class="tag platform-web">Web</span></td>
+          <td><span class="tag deprecated">Deprecated</span></td>
+          <td>Angular component, replaced by Pills toast system</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <!-- ==================== CHAINLINK DESIGN SYSTEM ==================== -->
+  <section class="section" id="chainlink">
+    <div class="section-header">
+      <div class="section-number" style="background:var(--blue3);">C</div>
+      <h2>Chainlink Design System — What Exists Today</h2>
+    </div>
+    <p class="section-desc">The shared design system (<code>@trainerroad/chainlink-dom</code> + <code>@trainerroad/chainlink-shared</code>) provides these alert-related primitives. Everything else is custom-built per app.</p>
+
+    <!-- Chainlink Modal -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal" style="padding:0;overflow:hidden;max-width:300px;">
+              <div style="padding:56px 36px;">
+                <span class="close">&times;</span>
+                <h4 style="margin-bottom:16px;">BasicModal</h4>
+                <p style="font-size:14px;margin-bottom:40px;">Pre-styled with title, text, up to 3 buttons, image support.</p>
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                  <button class="mock-btn primary" style="width:100%;">Primary</button>
+                  <button class="mock-btn secondary" style="width:100%;">Secondary</button>
+                  <span style="font-size:13px;color:var(--grey7);text-decoration:underline;">Tertiary Link</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Modal + BasicModal</h3>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;">
+            <span class="card-type type-modal">Modal</span>
+            <span class="card-type" style="background:#1482c833;color:var(--blue3);">Chainlink</span>
+          </div>
+          <div class="card-meta">
+            <div>
+              <dt>Variants</dt>
+              <dd><code>basic</code> (centered, max 500px) · <code>fullscreen</code> · <code>fullscreen-mobile</code></dd>
+            </div>
+            <div>
+              <dt>Props</dt>
+              <dd>isShown, hide, isStatic, isLoading, showCloseIcon, showCloseText, backgroundBlur, backgroundColor</dd>
+            </div>
+            <div>
+              <dt>BasicModal Slots</dt>
+              <dd>image, preComponent, title, text, children, primaryButton, secondaryButton, tertiaryButton, postComponent</dd>
+            </div>
+            <div>
+              <dt>Animation</dt>
+              <dd>200ms ease-out (100ms delay), scale 0.95→1, opacity 0→1</dd>
+            </div>
+            <div>
+              <dt>Sub-components</dt>
+              <dd>ModalTitle, ModalText, ModalFooter, ModalFooterButton, ModalTertiaryButton</dd>
+            </div>
+            <div>
+              <dt>Theme</dt>
+              <dd>Light: white bg · Dark: grey3 (#2e2e2e) bg · Fullscreen blur: 85% opacity + 32px backdrop-filter</dd>
+            </div>
+            <div>
+              <dt>Accessibility</dt>
+              <dd>Portal to body, scroll lock, ESC to close (unless isStatic), ariaLabel, focus trap</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Package:</span>
+        <span class="tag" style="border-color:#1482c855;color:#5eaadd;">@trainerroad/chainlink-dom</span>
+        <span class="tag">modal/Modal.tsx</span>
+        <span class="tag">modal/BasicModal/index.tsx</span>
+        <span class="tag">modal/shared.tsx</span>
+      </div>
+    </div>
+
+    <!-- Chainlink FormErrorMessage -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:20px;">
+          <div>
+            <div style="font-size:11px;color:var(--grey7);margin-bottom:8px;">Light Mode</div>
+            <div class="mock-form-field">
+              <label>Email</label>
+              <input type="text" value="bad@" readonly style="border-color:var(--red1);background:var(--white);color:var(--grey1);">
+              <div class="field-error" style="color:var(--red1);font-size:12px;font-weight:600;margin-top:4px;">Please enter a valid email</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--grey7);margin-bottom:8px;">Dark Mode</div>
+            <div class="mock-form-field">
+              <label>Email</label>
+              <input type="text" value="bad@" readonly style="border-color:var(--red5);">
+              <div class="field-error" style="color:var(--red5);font-size:12px;font-weight:600;margin-top:4px;">Please enter a valid email</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>FormErrorMessage + Input Error State</h3>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;">
+            <span class="card-type type-form">Form Error</span>
+            <span class="card-type" style="background:#1482c833;color:var(--blue3);">Chainlink</span>
+          </div>
+          <div class="card-meta">
+            <div>
+              <dt>FormErrorMessage</dt>
+              <dd>Paragraph level small, weight semibold, margin-top 4px, left-aligned</dd>
+            </div>
+            <div>
+              <dt>Light Mode</dt>
+              <dd><span class="swatch" style="background:var(--red1)"></span>error (#801810) — text and input border</dd>
+            </div>
+            <div>
+              <dt>Dark Mode</dt>
+              <dd><span class="swatch" style="background:var(--red5)"></span>errorDark (#ff5e5e) — text and input border</dd>
+            </div>
+            <div>
+              <dt>Input hasError</dt>
+              <dd>Border changes to error color, label changes to error color</dd>
+            </div>
+            <div>
+              <dt>Input Base</dt>
+              <dd>border-radius 2px, min-height 34px (68px with label), transition 200ms ease-out</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Package:</span>
+        <span class="tag" style="border-color:#1482c855;color:#5eaadd;">@trainerroad/chainlink-dom</span>
+        <span class="tag">forms/FormErrorMessage.tsx</span>
+        <span class="tag">forms/Input.tsx</span>
+      </div>
+    </div>
+
+    <!-- Chainlink Tooltip -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:16px;">
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;">
+            <div style="background:var(--grey5);padding:16px;border-radius:4px;max-width:260px;box-shadow:0 0 20px rgba(0,2,5,0.5);">
+              <div style="font-size:14px;font-weight:700;color:var(--grey15);margin-bottom:4px;">Tooltip Title</div>
+              <div style="font-size:12px;color:var(--grey10);">Contextual help text displayed on hover, focus, or touch.</div>
+            </div>
+            <div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--grey5);"></div>
+            <div style="margin-top:4px;padding:6px 12px;border:1px solid var(--grey5);border-radius:4px;font-size:12px;color:var(--grey9);">Hover me</div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Tooltip</h3>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;">
+            <span class="card-type type-inline">Tooltip</span>
+            <span class="card-type" style="background:#1482c833;color:var(--blue3);">Chainlink</span>
+          </div>
+          <div class="card-meta">
+            <div>
+              <dt>Placements</dt>
+              <dd>top, top-start, top-end, bottom, bottom-start, bottom-end</dd>
+            </div>
+            <div>
+              <dt>Props</dt>
+              <dd>toggleElement, title, text, children (custom), backgroundColor, isDisabled, isTouchDisabled</dd>
+            </div>
+            <div>
+              <dt>Theme</dt>
+              <dd>Light: white bg, rgba(0,25,50,0.4) shadow · Dark: grey5 bg, rgba(0,2,5,0.5) shadow</dd>
+            </div>
+            <div>
+              <dt>Animation</dt>
+              <dd>300ms ease visibility + translate3d(0,±8px,0)</dd>
+            </div>
+            <div>
+              <dt>Size</dt>
+              <dd>max-width 312px, padding 16px, z-index 9999</dd>
+            </div>
+            <div>
+              <dt>Triggers</dt>
+              <dd>Hover, focus, touch (toggle), auto-hides on scroll</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Package:</span>
+        <span class="tag" style="border-color:#1482c855;color:#5eaadd;">@trainerroad/chainlink-dom</span>
+        <span class="tag">tooltips/Tooltip.tsx</span>
+      </div>
+    </div>
+
+    <!-- Chainlink Color Palette -->
+    <div class="card">
+      <div class="card-top" style="flex-direction:column;">
+        <div style="padding:24px;">
+          <h3 style="color:var(--white);margin-bottom:16px;">Color Palette (83 colors)</h3>
+
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Greys</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <div style="width:40px;height:32px;background:#151515;border-radius:3px;border:1px solid var(--border);" title="black #151515"></div>
+              <div style="width:40px;height:32px;background:#1d1d1d;border-radius:3px;" title="grey1"></div>
+              <div style="width:40px;height:32px;background:#252525;border-radius:3px;" title="grey2"></div>
+              <div style="width:40px;height:32px;background:#2e2e2e;border-radius:3px;" title="grey3"></div>
+              <div style="width:40px;height:32px;background:#373737;border-radius:3px;" title="grey4"></div>
+              <div style="width:40px;height:32px;background:#3f3f3f;border-radius:3px;" title="grey5"></div>
+              <div style="width:40px;height:32px;background:#505050;border-radius:3px;" title="grey6"></div>
+              <div style="width:40px;height:32px;background:#6a6a6a;border-radius:3px;" title="grey7"></div>
+              <div style="width:40px;height:32px;background:#838383;border-radius:3px;" title="grey8"></div>
+              <div style="width:40px;height:32px;background:#9d9d9d;border-radius:3px;" title="grey9"></div>
+              <div style="width:40px;height:32px;background:#b6b6b6;border-radius:3px;" title="grey10"></div>
+              <div style="width:40px;height:32px;background:#d0d0d0;border-radius:3px;" title="grey11"></div>
+              <div style="width:40px;height:32px;background:#e0e0e0;border-radius:3px;" title="grey12"></div>
+              <div style="width:40px;height:32px;background:#e9e9e9;border-radius:3px;" title="grey13"></div>
+              <div style="width:40px;height:32px;background:#f1f1f1;border-radius:3px;" title="grey14"></div>
+              <div style="width:40px;height:32px;background:#fafafa;border-radius:3px;" title="grey15"></div>
+              <div style="width:40px;height:32px;background:#ffffff;border-radius:3px;border:1px solid var(--border);" title="white"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:24px;">
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reds / Error</div>
+              <div style="display:flex;gap:4px;">
+                <div style="width:40px;height:32px;background:#801810;border-radius:3px;" title="red1/error #801810"></div>
+                <div style="width:40px;height:32px;background:#c7251a;border-radius:3px;" title="red2 #c7251a"></div>
+                <div style="width:40px;height:32px;background:#da291c;border-radius:3px;" title="red3/red #da291c"></div>
+                <div style="width:40px;height:32px;background:#e53f33;border-radius:3px;" title="red4 #e53f33"></div>
+                <div style="width:40px;height:32px;background:#ff5e5e;border-radius:3px;" title="red5/errorDark #ff5e5e"></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Greens / Success</div>
+              <div style="display:flex;gap:4px;">
+                <div style="width:40px;height:32px;background:#377c1c;border-radius:3px;" title="green1 #377c1c"></div>
+                <div style="width:40px;height:32px;background:#439f1f;border-radius:3px;" title="green2/green #439f1f"></div>
+                <div style="width:40px;height:32px;background:#5bb836;border-radius:3px;" title="green3/hover #5bb836"></div>
+                <div style="width:40px;height:32px;background:#7acd59;border-radius:3px;" title="green4 #7acd59"></div>
+                <div style="width:40px;height:32px;background:#bae1a2;border-radius:3px;" title="green5 #bae1a2"></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Blues / Info</div>
+              <div style="display:flex;gap:4px;">
+                <div style="width:40px;height:32px;background:#004062;border-radius:3px;" title="blue1 #004062"></div>
+                <div style="width:40px;height:32px;background:#1271b4;border-radius:3px;" title="blue2 #1271b4"></div>
+                <div style="width:40px;height:32px;background:#1482c8;border-radius:3px;" title="blue3/blue #1482c8"></div>
+                <div style="width:40px;height:32px;background:#1795dc;border-radius:3px;" title="blue4/hover #1795dc"></div>
+                <div style="width:40px;height:32px;background:#19a2eb;border-radius:3px;" title="blue5 #19a2eb"></div>
+                <div style="width:40px;height:32px;background:#51bef1;border-radius:3px;" title="blue6 #51bef1"></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Yellows / Warning</div>
+              <div style="display:flex;gap:4px;">
+                <div style="width:40px;height:32px;background:#fbb000;border-radius:3px;" title="yellow1 #fbb000"></div>
+                <div style="width:40px;height:32px;background:#fac800;border-radius:3px;" title="yellow2/yellow #fac800"></div>
+                <div style="width:40px;height:32px;background:#fad342;border-radius:3px;" title="yellow3 #fad342"></div>
+                <div style="width:40px;height:32px;background:#fdebaf;border-radius:3px;" title="yellow4 #fdebaf"></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Other</div>
+              <div style="display:flex;gap:4px;">
+                <div style="width:40px;height:32px;background:#bd7019;border-radius:3px;" title="brown1 #bd7019"></div>
+                <div style="width:40px;height:32px;background:#e28a27;border-radius:3px;" title="brown2 #e28a27"></div>
+                <div style="width:40px;height:32px;background:#7a23a2;border-radius:3px;" title="purple #7a23a2"></div>
+                <div style="width:40px;height:32px;background:#b25fe6;border-radius:3px;" title="purple1 #b25fe6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Package:</span>
+        <span class="tag" style="border-color:#1482c855;color:#5eaadd;">@trainerroad/chainlink-shared</span>
+        <span class="tag">shared/src/colors.ts — 83 color tokens</span>
+      </div>
+    </div>
+
+    <!-- Chainlink Design Tokens -->
+    <div class="card">
+      <div class="card-top" style="flex-direction:column;">
+        <div style="padding:24px;">
+          <h3 style="color:var(--white);margin-bottom:16px;">Design Tokens &amp; Foundations</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:24px;">
+
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Typography</div>
+              <div style="font-size:13px;color:var(--text);line-height:1.8;">
+                <strong>Font:</strong> proxima-nova, Helvetica Neue, sans-serif<br>
+                <strong>Base:</strong> 62.5% (10px = 1rem)<br>
+                <strong>Headings:</strong> bold, letter-spacing 0.025rem<br>
+                <strong>Labels:</strong> uppercase, block display<br>
+                <strong>Components:</strong> Paragraph, Heading, Label, FormLabel
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Breakpoints</div>
+              <div style="font-size:13px;color:var(--text);line-height:1.8;">
+                <code>mobileTiny</code>: 370px<br>
+                <code>mobileLandscape</code>: 480px<br>
+                <code>mobile/tablet</code>: 768px<br>
+                <code>tabletLarge</code>: 958px<br>
+                <code>desktop</code>: 992px<br>
+                <code>desktopLarge</code>: 1200px<br>
+                <code>desktopXL</code>: 1400px
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Animation Standards</div>
+              <div style="font-size:13px;color:var(--text);line-height:1.8;">
+                <strong>Modal reveal:</strong> 200ms ease-out (100ms delay)<br>
+                <strong>Tooltip:</strong> 300ms ease<br>
+                <strong>Input focus:</strong> 200ms ease-out<br>
+                <strong>Backdrop:</strong> 100ms fade<br>
+                <strong>Scale:</strong> 0.95 → 1 (modal)<br>
+                <strong>Translate:</strong> ±8px (tooltip)
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Theme System</div>
+              <div style="font-size:13px;color:var(--text);line-height:1.8;">
+                <strong>Modes:</strong> Light, Dark (ThemeMode enum)<br>
+                <strong>Provider:</strong> ThemeProvider + ThemeContext<br>
+                <strong>Pattern:</strong> applyThemeModeMap() utility<br>
+                <strong>Locale:</strong> i18n support (40+ strings)<br>
+                <strong>Zone:</strong> Luxon timezone support
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Packages:</span>
+        <span class="tag" style="border-color:#1482c855;color:#5eaadd;">chainlink-shared</span>
+        <span class="tag">colors.ts</span>
+        <span class="tag">typography.ts</span>
+        <span class="tag">breakpoints.ts</span>
+        <span class="tag" style="border-color:#1482c855;color:#5eaadd;">chainlink-dom</span>
+        <span class="tag">ThemeContext.tsx</span>
+        <span class="tag">animations.ts</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== GAP ANALYSIS ==================== -->
+  <section class="section" id="gap-analysis">
+    <div class="section-header">
+      <div class="section-number" style="background:var(--yellow1);color:var(--grey1);">!</div>
+      <h2>Gap Analysis — Chainlink vs. What Apps Build</h2>
+    </div>
+    <p class="section-desc">What Chainlink provides vs. what each app re-invents. Green = in Chainlink. Red = custom-built per app. Yellow = partially covered.</p>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Alert Pattern</th>
+          <th>Chainlink</th>
+          <th>Web Custom</th>
+          <th>Desktop Custom</th>
+          <th>Mobile Custom</th>
+          <th>Gap</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Modal / Dialog</td>
+          <td><span style="color:var(--green);">&#10003; Modal + BasicModal</span></td>
+          <td><span style="color:var(--red5);">Legacy ModalService</span></td>
+          <td><span style="color:var(--red5);">Legacy Modal, SimpleModal, FullscreenModal</span></td>
+          <td><span style="color:var(--red5);">Custom Modal + BasicModal wrapper</span></td>
+          <td><span class="tag" style="background:#fbb00033;color:var(--yellow1);border:none;">Partial</span></td>
+        </tr>
+        <tr>
+          <td>Toast / Snackbar</td>
+          <td><span style="color:var(--red5);">Not provided</span></td>
+          <td><span style="color:var(--red5);">Pills system</span></td>
+          <td><span style="color:var(--red5);">BannerNotification</span></td>
+          <td><span style="color:var(--red5);">Notification component</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+        <tr>
+          <td>App Banner (top bar)</td>
+          <td><span style="color:var(--red5);">Not provided</span></td>
+          <td><span style="color:var(--red5);">3 banners + priority system</span></td>
+          <td><span style="color:var(--red5);">Internet, Update, Wahoo banners</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+        <tr>
+          <td>Inline Alert / Callout</td>
+          <td><span style="color:var(--red5);">Not provided</span></td>
+          <td><span style="color:var(--red5);">EstimateTss, AlertBox, ListViewBanner</span></td>
+          <td><span style="color:var(--red5);">WorkoutProgressions, Notification(7 types)</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+        <tr>
+          <td>Form Field Error</td>
+          <td><span style="color:var(--green);">&#10003; FormErrorMessage + Input hasError</span></td>
+          <td><span style="color:var(--yellow1);">FormikErrorMessage wraps Chainlink</span></td>
+          <td><span style="color:var(--yellow1);">ErrorWrapper wraps Chainlink</span></td>
+          <td><span style="color:var(--grey7);">Uses Chainlink</span></td>
+          <td><span class="tag" style="background:#439f1f33;color:var(--green);border:none;">Covered</span></td>
+        </tr>
+        <tr>
+          <td>Page-Level Error</td>
+          <td><span style="color:var(--red5);">Not provided</span></td>
+          <td><span style="color:var(--red5);">ErrorMessage, PageErrorMessage</span></td>
+          <td><span style="color:var(--red5);">ErrorBoundary (BasicModal fallback)</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+        <tr>
+          <td>Confirmation Dialog</td>
+          <td><span style="color:var(--yellow1);">BasicModal can be used</span></td>
+          <td><span style="color:var(--red5);">DrawerConfirmation custom</span></td>
+          <td><span style="color:var(--red5);">SidePanelModal, RecurringConfirmation</span></td>
+          <td><span style="color:var(--grey7);">Uses BasicModal</span></td>
+          <td><span class="tag" style="background:#fbb00033;color:var(--yellow1);border:none;">Partial</span></td>
+        </tr>
+        <tr>
+          <td>Drawer / Side Panel</td>
+          <td><span style="color:var(--red5);">Not provided</span></td>
+          <td><span style="color:var(--red5);">Drawer system (z-9998)</span></td>
+          <td><span style="color:var(--red5);">SidePanel (3 sizes)</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+        <tr>
+          <td>Status / Progress</td>
+          <td><span style="color:var(--yellow1);">LoadingSpinner only</span></td>
+          <td><span style="color:var(--red5);">RealtimeUpdates toast</span></td>
+          <td><span style="color:var(--red5);">AdaptationsPending, Copying, Settings notifs</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+        <tr>
+          <td>Save Confirmation</td>
+          <td><span style="color:var(--red5);">Not provided</span></td>
+          <td><span style="color:var(--red5);">SaveMessage component</span></td>
+          <td><span style="color:var(--red5);">SaveMessage component (duplicate)</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+        <tr>
+          <td>Tooltip</td>
+          <td><span style="color:var(--green);">&#10003; Tooltip (6 placements)</span></td>
+          <td><span style="color:var(--grey7);">Uses Chainlink</span></td>
+          <td><span style="color:var(--yellow1);">SimpleErrorWrapper uses custom tooltip</span></td>
+          <td><span style="color:var(--grey7);">N/A</span></td>
+          <td><span class="tag" style="background:#439f1f33;color:var(--green);border:none;">Covered</span></td>
+        </tr>
+        <tr>
+          <td>Accessibility (aria-live)</td>
+          <td><span style="color:var(--red5);">Not provided</span></td>
+          <td><span style="color:var(--red5);">AccessibilityAnnouncementService</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span style="color:var(--grey7);">None</span></td>
+          <td><span class="tag" style="background:#da291c33;color:var(--red5);border:none;">Missing</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-top:24px;">
+      <h4 style="color:var(--white);margin-bottom:12px;">Key Takeaway</h4>
+      <p style="font-size:14px;color:var(--text);line-height:1.7;">
+        Chainlink covers <strong>3 of 12 alert patterns</strong> (Modal, FormErrorMessage, Tooltip). The remaining <strong>9 patterns</strong> are custom-built independently in each app, leading to divergent implementations of the same concepts. The biggest opportunities are adding a <strong>Toast</strong>, <strong>Banner</strong>, <strong>InlineAlert</strong>, and <strong>Drawer</strong> component to Chainlink — these 4 additions alone would cover the majority of the fragmentation.
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ==================== TOASTS ==================== -->
+  <section class="section" id="toasts">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <h2>Toast Notifications (Pills)</h2>
+    </div>
+    <p class="section-desc">The primary feedback mechanism for user actions. Fixed to bottom of viewport, auto-dismisses after 5 seconds.</p>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="toast-variants">
+            <div class="mock-toast">
+              <div class="icon success">&#10003;</div>
+              Password updated successfully
+            </div>
+            <div class="mock-toast">
+              <div class="icon error" style="display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">&times;</div>
+              Something went wrong
+            </div>
+            <div class="mock-toast">
+              <div class="icon info" style="display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">i</div>
+              Levels updated
+              <span class="action-btn">View</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Toast Pills</h3>
+          <span class="card-type type-toast">Toast</span>
+          <div class="card-meta">
+            <div>
+              <dt>Variants</dt>
+              <dd><span class="swatch" style="background:var(--grey3)"></span>Default &nbsp; <span class="swatch" style="background:var(--green)"></span>Success &nbsp; <span class="swatch" style="background:var(--red2)"></span>Error &nbsp; <span class="swatch" style="background:var(--blue3)"></span>Info</dd>
+            </div>
+            <div>
+              <dt>Position</dt>
+              <dd>Fixed, bottom-left, z-index 999</dd>
+            </div>
+            <div>
+              <dt>Size</dt>
+              <dd>54px height, max-width 500px, border-radius 27px</dd>
+            </div>
+            <div>
+              <dt>Behavior</dt>
+              <dd>Auto-dismiss 5s, sticky option, supports action buttons</dd>
+            </div>
+            <div>
+              <dt>Background</dt>
+              <dd><span class="swatch" style="background:var(--grey3)"></span>#2e2e2e (all variants use same bg)</dd>
+            </div>
+            <div>
+              <dt>Accessibility</dt>
+              <dd>role="alert" (error), role="status" (others), aria-live</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">core/toast-notifications/view/Pills.tsx</span>
+        <span class="tag">core/toast-notifications/service.ts</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== APP BANNERS ==================== -->
+  <section class="section" id="banners">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <h2>App Banners</h2>
+    </div>
+    <p class="section-desc">Top-of-page banners with priority system. Only one visible at a time. Hidden on onboarding/subscription pages.</p>
+
+    <!-- Schedule Call -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="padding:0;">
+          <div class="mock-banner light" style="flex-wrap:wrap;">
+            <span style="font-size:16px;">&#128241;</span>
+            <span>Schedule a free 1-on-1 consultation call</span>
+            <button class="banner-btn">Schedule</button>
+            <span class="close-btn" style="color:var(--grey7);">&times;</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Schedule Call Banner</h3>
+          <span class="card-type type-banner">Banner</span>
+          <div class="card-meta">
+            <div>
+              <dt>Variants</dt>
+              <dd>"onboarding" | "account"</dd>
+            </div>
+            <div>
+              <dt>Background</dt>
+              <dd><span class="swatch" style="background:var(--grey14)"></span>#f1f1f1 (grey14)</dd>
+            </div>
+            <div>
+              <dt>Priority</dt>
+              <dd>1 (Highest)</dd>
+            </div>
+            <div>
+              <dt>Behavior</dt>
+              <dd>Dismissible, persists via Calendly integration, shown &lt;30 days</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">core/app-banners/ScheduleCallBanner.tsx</span>
+      </div>
+    </div>
+
+    <!-- Download Apps -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="padding:0;">
+          <div class="mock-banner dark">
+            <span style="color:var(--yellow2);font-size:16px;">&#9888;</span>
+            <span>Download the TrainerRoad App to start training</span>
+            <span class="close-btn">&times;</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Download Apps Banner</h3>
+          <span class="card-type type-banner">Banner</span>
+          <div class="card-meta">
+            <div>
+              <dt>Background</dt>
+              <dd><span class="swatch" style="background:var(--grey2)"></span>#252525 (grey2)</dd>
+            </div>
+            <div>
+              <dt>Icon</dt>
+              <dd><span class="swatch" style="background:var(--yellow2)"></span>ErrorIcon, yellow2</dd>
+            </div>
+            <div>
+              <dt>Priority</dt>
+              <dd>2 (Medium)</dd>
+            </div>
+            <div>
+              <dt>Behavior</dt>
+              <dd>Dismissible, hidden if user has contacted app</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">core/app-banners/DownloadAppsBanner.tsx</span>
+      </div>
+    </div>
+
+    <!-- Public Profile -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="padding:0;">
+          <div class="mock-banner dark">
+            <span style="color:var(--yellow2);font-size:16px;">&#9888;</span>
+            <span>Heads Up! Your profile is currently set to public</span>
+            <span class="close-btn">&times;</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Public Profile Banner</h3>
+          <span class="card-type type-banner">Banner</span>
+          <div class="card-meta">
+            <div>
+              <dt>Background</dt>
+              <dd><span class="swatch" style="background:var(--grey2)"></span>#252525 (grey2)</dd>
+            </div>
+            <div>
+              <dt>Priority</dt>
+              <dd>3 (Lowest)</dd>
+            </div>
+            <div>
+              <dt>Behavior</dt>
+              <dd>Shown only after 7 days, public profiles only</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">core/app-banners/PublicProfileBanner.tsx</span>
+      </div>
+    </div>
+
+    <!-- Desktop Banner Notification -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="padding:0;">
+          <div style="display:flex;flex-direction:column;gap:8px;width:100%;padding:16px;">
+            <div class="mock-notif success" style="font-size:13px;border-radius:2px;">
+              <span>&#10003;</span> Action completed successfully
+              <span style="margin-left:auto;font-size:12px;opacity:0.8;text-decoration:underline;">Dismiss</span>
+            </div>
+            <div class="mock-notif error" style="font-size:13px;border-radius:2px;">
+              <span>&times;</span> Connection to server lost
+              <span style="margin-left:auto;font-size:12px;opacity:0.8;text-decoration:underline;">Learn More</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Banner Notification (Desktop)</h3>
+          <span class="card-type type-banner">Banner</span>
+          <div class="card-meta">
+            <div>
+              <dt>Variants</dt>
+              <dd>Success, Error, Update (loading)</dd>
+            </div>
+            <div>
+              <dt>Behavior</dt>
+              <dd>Auto-dismiss 5s, route-aware, action button support</dd>
+            </div>
+            <div>
+              <dt>Icons</dt>
+              <dd>CheckmarkFilledIcon, CloseFilledIcon, LoadingSpinner</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Notification/BannerNotification.tsx</span>
+      </div>
+    </div>
+
+    <!-- Internet Banner -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="padding:0;">
+          <div class="mock-notif error" style="font-size:13px;border-radius:0;justify-content:center;">
+            <span style="font-size:12px;">&#9888;</span>
+            <span style="font-weight:600;font-size:12px;">Server unavailable. Attempting to reconnect...</span>
+            <span style="position:absolute;right:24px;font-size:12px;text-decoration:underline;">Learn More</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Internet / Connection Banner</h3>
+          <span class="card-type type-banner">Banner</span>
+          <div class="card-meta">
+            <div>
+              <dt>States</dt>
+              <dd>Server unavailable, Offline</dd>
+            </div>
+            <div>
+              <dt>Background</dt>
+              <dd><span class="swatch" style="background:var(--red1)"></span>#801810 (error)</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Notification/InternetBanner.tsx</span>
+      </div>
+    </div>
+
+    <!-- Update Notification -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="padding:0;">
+          <div class="mock-notif update" style="font-size:13px;border-radius:0;justify-content:center;">
+            <span>&#8635;</span>
+            <span style="font-weight:600;">Update Available</span>
+            <span style="margin-left:8px;text-decoration:underline;font-size:12px;">Restart App Now</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Update Notification</h3>
+          <span class="card-type type-banner">Banner</span>
+          <div class="card-meta">
+            <div>
+              <dt>States</dt>
+              <dd>Ready (restart CTA), Downloading (progress %)</dd>
+            </div>
+            <div>
+              <dt>Background</dt>
+              <dd><span class="swatch" style="background:var(--green)"></span>#439f1f (green)</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Notification/UpdateNotification.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== MODALS ==================== -->
+  <section class="section" id="modals">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <h2>Modal Dialog Systems</h2>
+    </div>
+    <p class="section-desc">Multiple modal implementations across platforms. Chainlink modals are the recommended standard.</p>
+
+    <!-- Chainlink Modal -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal">
+              <span class="close">&times;</span>
+              <h4>Modal Title</h4>
+              <p>This is the recommended modal pattern using Chainlink design system.</p>
+              <div class="btn-row">
+                <button class="mock-btn secondary">Cancel</button>
+                <button class="mock-btn primary">Confirm</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Chainlink Modal (Recommended)</h3>
+          <span class="card-type type-modal">Modal</span>
+          <div class="card-meta">
+            <div>
+              <dt>Package</dt>
+              <dd>@trainerroad/chainlink-dom</dd>
+            </div>
+            <div>
+              <dt>Components</dt>
+              <dd>Modal, BasicModal, ModalFooter, ModalText, ModalTitle</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>Static mode, close icon, variant support, loading state</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Used in:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag platform-mobile">Mobile</span>
+      </div>
+    </div>
+
+    <!-- Legacy Modal (Web) -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal" style="padding:56px;">
+              <span class="close">&times;</span>
+              <h4>Legacy Modal</h4>
+              <p style="font-size:13px;">Grey3 background, 56px padding, 504px max-width. Service-based state management.</p>
+              <div class="btn-row">
+                <button class="mock-btn secondary">Cancel</button>
+                <button class="mock-btn primary">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Legacy ModalService</h3>
+          <span class="card-type type-modal">Modal</span> <span class="card-type type-error" style="margin-left:4px;">Deprecated</span>
+          <div class="card-meta">
+            <div>
+              <dt>Background</dt>
+              <dd><span class="swatch" style="background:var(--grey3)"></span>#2e2e2e, overlay rgba(21,21,21,0.5)</dd>
+            </div>
+            <div>
+              <dt>Size</dt>
+              <dd>Max-width 504px, padding 56px, z-index 9999</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>Fullscreen, fixed position, portal rendering, component slot</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag deprecated">Deprecated</span>
+        <span class="tag">common-react/components/Modal/</span>
+        <span class="tag">common-react/services/ModalService.tsx</span>
+      </div>
+    </div>
+
+    <!-- Desktop Modals -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper" style="background:rgba(37,37,37,0.7);">
+            <div class="mock-modal" style="border-radius:8px;padding:32px;">
+              <span class="close">&times;</span>
+              <h4 style="font-size:16px;">Fullscreen Modal</h4>
+              <p style="font-size:12px;">Blur backdrop, 300ms fade-in, z-index 1000. Used for immersive flows like post-workout.</p>
+              <button class="mock-btn green" style="width:100%;">Continue</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Desktop Modal Variants</h3>
+          <span class="card-type type-modal">Modal</span>
+          <div class="card-meta">
+            <div>
+              <dt>Types</dt>
+              <dd>Legacy Modal, SimpleModal, SidePanelModal, FullscreenModal, ChainlinkModalRenderer</dd>
+            </div>
+            <div>
+              <dt>Animation</dt>
+              <dd>Scale 0.75&rarr;1 (150ms), fade-in (300ms for fullscreen)</dd>
+            </div>
+            <div>
+              <dt>Sizes</dt>
+              <dd>default, medium, large, fullscreen, fullscreen-opaque</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Components/Modal/</span>
+        <span class="tag">Components/SimpleModal/</span>
+        <span class="tag">Components/Modal/FullscreenModal/</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== ALERT MODALS ==================== -->
+  <section class="section" id="alert-modals">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <h2>Alert-Specific Modals</h2>
+    </div>
+    <p class="section-desc">Purpose-built modals for specific alert scenarios throughout the app.</p>
+
+    <!-- Red Day -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal">
+              <div class="modal-icon" style="background:var(--red2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;">!</div>
+              <h4>Warning</h4>
+              <p style="font-size:13px;">Your recent training stress is very high. This is a recommended rest day...</p>
+              <div class="btn-row">
+                <button class="mock-btn secondary">Add Anyway</button>
+                <button class="mock-btn primary">Got It!</button>
+              </div>
+              <div style="margin-top:16px;font-size:12px;color:var(--grey7);">
+                <span style="text-decoration:underline;">Learn more about red days</span> &#8599;
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Red Day Alert Modal</h3>
+          <span class="card-type type-modal">Modal</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Warn about high training stress on recommended rest days</dd>
+            </div>
+            <div>
+              <dt>Icon</dt>
+              <dd><span class="swatch" style="background:var(--red2)"></span>NoIcon, red2, 36px</dd>
+            </div>
+            <div>
+              <dt>Actions</dt>
+              <dd>"Got It!" (primary), "Add Anyway" (secondary), Learn More link</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">core/components/RedDayAlertModal.tsx</span>
+      </div>
+    </div>
+
+    <!-- AI FTP Error -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal">
+              <div class="modal-icon" style="background:var(--red2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">&times;</div>
+              <h4>AI FTP Detection Error</h4>
+              <p style="font-size:13px;">We couldn't detect your FTP at this time. Please try again later.</p>
+              <button class="mock-btn primary" style="width:100%;">Try Again</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>AI FTP Error Modals</h3>
+          <span class="card-type type-modal">Modal</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Display API errors and unsupported FTP detection conditions</dd>
+            </div>
+            <div>
+              <dt>Variants</dt>
+              <dd>ApiError, GenericError (localized messages by failure reason)</dd>
+            </div>
+            <div>
+              <dt>Action</dt>
+              <dd>"Try Again" with disabled state during retry</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag platform-mobile">Mobile</span>
+        <span class="tag">core/ai-ftp/modal/api-error/</span>
+        <span class="tag">core/ai-ftp/modal/cannot-use-ai-ftp/</span>
+      </div>
+    </div>
+
+    <!-- Wahoo -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal">
+              <h4 style="font-size:15px;">Important: Update Your Wahoo Connection</h4>
+              <p style="font-size:13px;">Your Wahoo integration needs to be reauthorized to continue syncing.</p>
+              <div class="btn-row">
+                <button class="mock-btn secondary">Not Now</button>
+                <button class="mock-btn primary">Update</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Wahoo Integration Modals</h3>
+          <span class="card-type type-modal">Modal</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Device reauthorization and resync prompts</dd>
+            </div>
+            <div>
+              <dt>Variants</dt>
+              <dd>WahooUpdateModal (Desktop), WahooResyncBanner, WahooReauthorizeModal (Mobile)</dd>
+            </div>
+            <div>
+              <dt>Behavior</dt>
+              <dd>Shows once per status change, external link for reauth</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag platform-mobile">Mobile</span>
+        <span class="tag">Career/Education/WahooUpdateModal.tsx</span>
+        <span class="tag">Notification/WahooResyncBanner.tsx</span>
+      </div>
+    </div>
+
+    <!-- Adapt Event -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal">
+              <h4 style="font-size:15px;">Adapt Your Plan?</h4>
+              <p style="font-size:13px;">Current end: <strong>Mar 15</strong> &rarr; New end: <strong>Mar 22</strong></p>
+              <div style="font-size:12px;color:var(--grey8);margin-bottom:16px;text-decoration:underline;">Learn More</div>
+              <div class="btn-row">
+                <button class="mock-btn secondary">Cancel</button>
+                <button class="mock-btn primary">Adapt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Adapt Event Modal</h3>
+          <span class="card-type type-modal">Modal</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Confirmation for plan adaptation (schedule/delete/load)</dd>
+            </div>
+            <div>
+              <dt>Content</dt>
+              <dd>Plan name, current/new end date comparison, learn more link</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag platform-mobile">Mobile</span>
+        <span class="tag">Event/AdaptEventModal.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== INLINE ALERTS ==================== -->
+  <section class="section" id="inline">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <h2>Inline Alerts &amp; Info Boxes</h2>
+    </div>
+    <p class="section-desc">Contextual alerts embedded within page content. Theme-aware with light/dark variants.</p>
+
+    <!-- EstimateTss -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:12px;">
+          <div class="mock-inline info-light">
+            <div class="inline-icon" style="background:var(--blue3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;border-radius:50%;width:20px;height:20px;flex-shrink:0;">i</div>
+            <span style="font-size:13px;">TSS is estimated for this activity. <span style="text-decoration:underline;color:var(--blue3);">Learn more</span></span>
+          </div>
+          <div class="mock-inline info-dark">
+            <div class="inline-icon" style="background:var(--blue3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;border-radius:50%;width:20px;height:20px;flex-shrink:0;">i</div>
+            <span style="font-size:13px;">TSS is estimated for this activity. <span style="text-decoration:underline;color:var(--blue4);">Learn more</span></span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>EstimateTss Banner</h3>
+          <span class="card-type type-inline">Inline Alert</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Info banner about estimated TSS values</dd>
+            </div>
+            <div>
+              <dt>Light Theme</dt>
+              <dd><span class="swatch" style="background:var(--grey15)"></span>grey15 bg, <span class="swatch" style="background:var(--grey11);border:1px solid var(--grey9)"></span>grey11 border</dd>
+            </div>
+            <div>
+              <dt>Dark Theme</dt>
+              <dd><span class="swatch" style="background:var(--grey2)"></span>grey2 bg, <span class="swatch" style="background:var(--grey6)"></span>grey6 border</dd>
+            </div>
+            <div>
+              <dt>Size</dt>
+              <dd>padding 12px, border-radius 4px, gap 16px</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">activity-shared/components/EstimateTssBanner.tsx</span>
+      </div>
+    </div>
+
+    <!-- Warning Alert Box -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:12px;">
+          <div class="mock-inline warning">
+            <div class="inline-icon" style="background:var(--yellow1);display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:50%;width:20px;height:20px;flex-shrink:0;">!</div>
+            <span style="font-size:13px;">This action cannot be undone. Please review your changes carefully.</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Alert Box (Warning Theme)</h3>
+          <span class="card-type type-inline">Inline Alert</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Warning/caution messages in forms and flows</dd>
+            </div>
+            <div>
+              <dt>Light Theme</dt>
+              <dd><span class="swatch" style="background:#fef5d7"></span>#fef5d7 bg, <span class="swatch" style="background:var(--yellow2)"></span>yellow2 border</dd>
+            </div>
+            <div>
+              <dt>Dark Theme</dt>
+              <dd><span class="swatch" style="background:rgba(251,176,0,0.15)"></span>rgba(251,176,0,0.15) bg, <span class="swatch" style="background:var(--yellow1)"></span>yellow1 border</dd>
+            </div>
+            <div>
+              <dt>Used in</dt>
+              <dd>AI FTP components, form alerts, warning boxes</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">ai-ftp/modal/shared.styled.tsx (alertThemeModeMap)</span>
+      </div>
+    </div>
+
+    <!-- ListViewBanner -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div style="width:100%;background:var(--grey3);border-radius:2px;padding:12px 16px;">
+            <div style="font-size:13px;color:var(--white);margin-bottom:8px;">Try using the Workouts List view for easier navigation.</div>
+            <div style="display:flex;gap:8px;">
+              <button class="mock-btn primary" style="padding:6px 14px;font-size:12px;">Go to Workouts List</button>
+              <button class="mock-btn secondary" style="padding:6px 14px;font-size:12px;">Dismiss</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>List View Banner</h3>
+          <span class="card-type type-inline">Inline Alert</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Navigation tip about workout list view</dd>
+            </div>
+            <div>
+              <dt>Accessibility</dt>
+              <dd>role="complementary", aria-label, aria-describedby</dd>
+            </div>
+            <div>
+              <dt>Actions</dt>
+              <dd>"Go to Workouts List" (primary), "Dismiss" (secondary)</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">workouts/views/ListViewBanner.tsx</span>
+      </div>
+    </div>
+
+    <!-- Workout Progressions Banner -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div style="width:100%;border:1px solid var(--yellow1);border-radius:2px;overflow:hidden;">
+            <div style="background:var(--grey4);padding:8px 12px;font-size:12px;font-weight:600;color:var(--white);">Progression Changes</div>
+            <div style="background:var(--grey3);padding:12px;font-size:13px;color:var(--grey10);">
+              Sweet Spot: Level 4.2 &rarr; 3.8<br>
+              Threshold: Level 3.5 &rarr; 3.1
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Workout Progressions Banner</h3>
+          <span class="card-type type-inline">Inline Alert</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Show progression level changes after workout</dd>
+            </div>
+            <div>
+              <dt>Styling</dt>
+              <dd><span class="swatch" style="background:var(--grey3)"></span>grey3 bg, <span class="swatch" style="background:var(--yellow1)"></span>yellow1 border, grey4 header</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">WorkoutDetails/ProgressionChart/WorkoutProgressionsBanner.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== NOTIFICATIONS ==================== -->
+  <section class="section" id="notifications">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <h2>Notification Components (Desktop)</h2>
+    </div>
+    <p class="section-desc">The desktop app has a rich Notification component with 7 type variants and 3 sizes.</p>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:0;padding:0;">
+          <div style="display:flex;flex-direction:column;gap:6px;width:100%;padding:16px;">
+            <div class="mock-notif success" style="font-size:13px;"><span>&#10003;</span> Success notification</div>
+            <div class="mock-notif error" style="font-size:13px;"><span>&times;</span> Error notification</div>
+            <div class="mock-notif warning" style="font-size:13px;"><span>&#9888;</span> Warning notification</div>
+            <div class="mock-notif resume" style="font-size:13px;"><span>&#9654;</span> Resume notification</div>
+            <div class="mock-notif info" style="font-size:13px;"><span>&#8505;</span> Info notification</div>
+            <div class="mock-notif banner" style="font-size:13px;"><span>&#128276;</span> Banner notification</div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Desktop Notification Component</h3>
+          <span class="card-type type-status">Notification</span>
+          <div class="card-meta">
+            <div>
+              <dt>Types</dt>
+              <dd>
+                <span class="swatch" style="background:var(--green)"></span>success
+                <span class="swatch" style="background:var(--red1)"></span>error
+                <span class="swatch" style="background:var(--yellow1)"></span>warning
+                <span class="swatch" style="background:var(--green)"></span>update
+                <span class="swatch" style="background:var(--blue3)"></span>resume
+                <span class="swatch" style="background:var(--grey3)"></span>banner
+                <span class="swatch" style="background:var(--grey4)"></span>info
+              </dd>
+            </div>
+            <div>
+              <dt>Sizes</dt>
+              <dd>Small (12px/8px pad), Normal (14px/12px), Large (18px)</dd>
+            </div>
+            <div>
+              <dt>Special</dt>
+              <dd>Bubble variant: circular (32/24/40px), bold text</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>Icon, close button, animation (react-pose), theme support</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Components/Notification/Notification.tsx</span>
+        <span class="tag">Components/Notification/Notification.module.scss</span>
+      </div>
+    </div>
+
+    <!-- Mobile Notification -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:8px;">
+          <div style="background:var(--green);color:var(--white);padding:12px 16px;border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;width:100%;">
+            <span>&#10003;</span> Success message on mobile
+          </div>
+          <div style="background:var(--red2);color:var(--white);padding:12px 16px;border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;width:100%;">
+            <span>&times;</span> Error message on mobile
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Mobile Notification</h3>
+          <span class="card-type type-status">Notification</span>
+          <div class="card-meta">
+            <div>
+              <dt>Variants</dt>
+              <dd><span class="swatch" style="background:var(--green)"></span>success &nbsp; <span class="swatch" style="background:var(--red2)"></span>error</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>Animated (opacity + translateY), role="alert", children support</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-mobile">Mobile</span>
+        <span class="tag">components/Notification.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== FORM ERRORS ==================== -->
+  <section class="section" id="form">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <h2>Form Validation &amp; Error Messages</h2>
+    </div>
+    <p class="section-desc">Field-level and page-level error display patterns.</p>
+
+    <!-- Field Error -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:20px;">
+          <div class="mock-form-field">
+            <label>Email Address</label>
+            <input type="text" value="invalid-email" readonly>
+            <div class="field-error">Please enter a valid email address</div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Form Field Errors</h3>
+          <span class="card-type type-form">Form Error</span>
+          <div class="card-meta">
+            <div>
+              <dt>Components</dt>
+              <dd>FormikErrorMessage, TextField, FormErrorMessage (Chainlink)</dd>
+            </div>
+            <div>
+              <dt>Style</dt>
+              <dd>Red border on input, red error text below field</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">FormikErrorMessage.tsx</span>
+        <span class="tag">ErrorWrapper/ErrorWrapper.tsx</span>
+      </div>
+    </div>
+
+    <!-- Page Error (Light) -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="flex-direction:column;gap:12px;">
+          <div class="mock-error-msg light">
+            <div class="err-icon" style="background:var(--red1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;border-radius:50;flex-shrink:0;">!</div>
+            <span style="font-size:14px;">An error occurred while saving your changes.</span>
+          </div>
+          <div class="mock-error-msg dark">
+            <div class="err-icon" style="background:var(--red5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;border-radius:50%;flex-shrink:0;">!</div>
+            <span style="font-size:14px;">An error occurred while saving your changes.</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>ErrorMessage / PageErrorMessage</h3>
+          <span class="card-type type-form">Error Display</span>
+          <div class="card-meta">
+            <div>
+              <dt>Light Mode</dt>
+              <dd><span class="swatch" style="background:var(--white);border:1px solid var(--grey13)"></span>white bg, grey13 border, error text color</dd>
+            </div>
+            <div>
+              <dt>Dark Mode</dt>
+              <dd><span class="swatch" style="background:var(--grey3)"></span>grey3 bg, grey4 border, errorDark text color</dd>
+            </div>
+            <div>
+              <dt>Size</dt>
+              <dd>padding 16px 20px, border-radius 2px, gap 12px</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">common-react/components/ErrorMessage.tsx</span>
+        <span class="tag">common-react/components/PageErrorMessage.tsx</span>
+      </div>
+    </div>
+
+    <!-- Save Message -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+            <div class="mock-save">
+              <span class="check">&#10003;</span>
+              <span>Saved</span>
+            </div>
+            <div style="font-size:11px;color:var(--grey7);">Appears at top-right of form fields after save</div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>SaveMessage</h3>
+          <span class="card-type type-form">Success Indicator</span>
+          <div class="card-meta">
+            <div>
+              <dt>Icon</dt>
+              <dd><span class="swatch" style="background:var(--green)"></span>CheckmarkFilledIcon, green, 12px</dd>
+            </div>
+            <div>
+              <dt>Text</dt>
+              <dd>Green, micro level, "Saved"</dd>
+            </div>
+            <div>
+              <dt>Position</dt>
+              <dd>Absolute (default top: 12px, right: 16px) or static</dd>
+            </div>
+            <div>
+              <dt>Animation</dt>
+              <dd>Fade in/out via react-spring opacity transition</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">core/components/SaveMessage.tsx</span>
+        <span class="tag">ErrorWrapper/SaveMessage.tsx</span>
+      </div>
+    </div>
+
+    <!-- Web Notification (green bar) -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div style="background:var(--green);padding:12px;border-radius:2px;color:var(--white);font-size:14px;display:flex;align-items:center;width:100%;">
+            Settings saved successfully
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Notification Component (Web)</h3>
+          <span class="card-type type-form">Success Indicator</span>
+          <div class="card-meta">
+            <div>
+              <dt>Default Color</dt>
+              <dd><span class="swatch" style="background:var(--green)"></span>green background</dd>
+            </div>
+            <div>
+              <dt>Style</dt>
+              <dd>padding 12px, border-radius 2px, configurable bg color</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">common-react/components/Notification.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== CONFIRMATIONS ==================== -->
+  <section class="section" id="confirmations">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <h2>Confirmation Dialogs</h2>
+    </div>
+    <p class="section-desc">Dialogs requiring user decision before proceeding with destructive or significant actions.</p>
+
+    <!-- Drawer Confirmation -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-drawer-wrapper">
+            <div class="mock-drawer">
+              <h4>Delete Activity?</h4>
+              <p>This action cannot be undone. Are you sure you want to delete this activity?</p>
+              <div style="display:flex;align-items:center;gap:8px;color:var(--red5);font-size:13px;">
+                <span>&times;</span> Error deleting activity
+              </div>
+              <div style="display:flex;gap:8px;margin-top:auto;">
+                <button class="mock-btn secondary" style="flex:1;font-size:13px;padding:8px;">Cancel</button>
+                <button class="mock-btn primary" style="flex:1;font-size:13px;padding:8px;">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Drawer Confirmation</h3>
+          <span class="card-type type-modal">Confirmation</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Confirm destructive actions within drawer context</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>Title, description, optional error display, loading state, cancel/confirm buttons</dd>
+            </div>
+            <div>
+              <dt>Width</dt>
+              <dd>Default or wide drawer variant</dd>
+            </div>
+            <div>
+              <dt>Used For</dt>
+              <dd>Activity, annotation, event, plan deletions</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">calendar/components/DrawerConfirmation.tsx</span>
+      </div>
+    </div>
+
+    <!-- Recurring Confirmation -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal" style="text-align:left;padding:32px;">
+              <h4 style="font-size:15px;text-align:left;">Edit Recurring Activity</h4>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="padding:10px 14px;border:1px solid var(--grey5);border-radius:4px;font-size:13px;color:var(--white);cursor:pointer;">This activity only</div>
+                <div style="padding:10px 14px;border:1px solid var(--grey5);border-radius:4px;font-size:13px;color:var(--white);cursor:pointer;">This and future uncompleted activities</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Recurring Confirmation</h3>
+          <span class="card-type type-modal">Confirmation</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Choose scope for recurring event modifications</dd>
+            </div>
+            <div>
+              <dt>Options</dt>
+              <dd>"This activity only" or "This and future uncompleted activities"</dd>
+            </div>
+            <div>
+              <dt>Renders as</dt>
+              <dd>SidePanelModal or standalone modal</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Calendar/ActivityScheduling/RecurringConfirmation.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== STATUS INDICATORS ==================== -->
+  <section class="section" id="status">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <h2>Status Indicators</h2>
+    </div>
+    <p class="section-desc">Floating or fixed-position status notifications for async operations.</p>
+
+    <!-- Adaptations Pending -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="background:var(--grey1);flex-direction:column;gap:12px;">
+          <div class="mock-adapt">
+            <div class="adapt-inner">
+              <div class="adapt-icon" style="background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">&#10003;</div>
+              <span style="font-size:13px;">No Adaptations</span>
+            </div>
+          </div>
+          <div class="mock-adapt">
+            <div class="adapt-inner">
+              <div class="adapt-icon" style="background:var(--red2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">&#8646;</div>
+              <span style="font-size:13px;">Adaptations Pending</span>
+            </div>
+            <span class="preview-btn">Preview</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Adaptations Pending Notification</h3>
+          <span class="card-type type-status">Status</span>
+          <div class="card-meta">
+            <div>
+              <dt>States</dt>
+              <dd>Checking (spinner), No Adaptations (green check), Pending (red icon + Preview)</dd>
+            </div>
+            <div>
+              <dt>Style</dt>
+              <dd>White pill, border-radius 100px, shadow, z-index 102</dd>
+            </div>
+            <div>
+              <dt>Position</dt>
+              <dd>Absolute bottom-center, animated slide-up (300ms ease-out)</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Calendar/Adaptation/AdaptationsPendingNotification.tsx</span>
+      </div>
+    </div>
+
+    <!-- Copying Notification -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="background:var(--grey1);">
+          <div style="background:var(--grey3);color:var(--white);padding:12px 20px;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:12px;">
+            <span>Copying "Sweet Spot Base"...</span>
+            <span style="color:var(--grey8);font-size:12px;margin-left:auto;">ESC to cancel</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Copying / Moving Notification</h3>
+          <span class="card-type type-status">Status</span>
+          <div class="card-meta">
+            <div>
+              <dt>Purpose</dt>
+              <dd>Show status during calendar copy/move operations</dd>
+            </div>
+            <div>
+              <dt>Position</dt>
+              <dd>Bottom-center, fixed</dd>
+            </div>
+            <div>
+              <dt>Actions</dt>
+              <dd>Cancel via ESC or click</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">Calendar/monthView/CopyingNotification.tsx</span>
+      </div>
+    </div>
+
+    <!-- Real-time Updates -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="toast-variants">
+            <div class="mock-toast" style="max-width:320px;">
+              <div style="width:16px;height:16px;border:2px solid var(--white);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;flex-shrink:0;"></div>
+              Updating progression levels...
+            </div>
+            <div class="mock-toast" style="max-width:320px;">
+              <div class="icon success" style="display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">&#10003;</div>
+              Progression levels updated
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Real-time Updates Notification</h3>
+          <span class="card-type type-toast">Toast</span>
+          <div class="card-meta">
+            <div>
+              <dt>States</dt>
+              <dd>"started" (spinner, sticky) &rarr; "completed" (checkmark, 3s dismiss)</dd>
+            </div>
+            <div>
+              <dt>Delivery</dt>
+              <dd>Via toast notification service</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">career/components/content/RealtimeUpdatesNotification.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== DRAWERS ==================== -->
+  <section class="section" id="drawers">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <h2>Drawer / Side Panel Systems</h2>
+    </div>
+    <p class="section-desc">Slide-in panels used for contextual actions, forms, and confirmations.</p>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-drawer-wrapper">
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--grey7);font-size:13px;">
+              Page Content (dimmed)
+            </div>
+            <div class="mock-drawer" style="border-left:1px solid var(--grey5);">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h4>Edit Activity</h4>
+                <span style="color:var(--grey7);cursor:pointer;">&times;</span>
+              </div>
+              <div style="height:1px;background:var(--grey5);"></div>
+              <p>Drawer content area with forms, details, and actions.</p>
+              <div style="margin-top:auto;">
+                <button class="mock-btn primary" style="width:100%;font-size:13px;padding:8px;">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Drawer / SidePanel Systems</h3>
+          <span class="card-type type-modal">Panel</span>
+          <div class="card-meta">
+            <div>
+              <dt>Web Drawer</dt>
+              <dd>z-index 9998, 400ms fade, RTL/LTR, ESC dismiss, backdrop</dd>
+            </div>
+            <div>
+              <dt>Desktop SidePanel</dt>
+              <dd>150ms slide-in, sizes: small(160px), medium(320px), large(480px)</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>Multiple concurrent (web), header/footer slots, portal rendering</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">core/drawer/index.tsx</span>
+        <span class="tag">Components/SidePanel/</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== ACCESSIBILITY ==================== -->
+  <section class="section" id="a11y">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <h2>Accessibility Announcements</h2>
+    </div>
+    <p class="section-desc">Screen-reader-only live region for non-visual alert communication.</p>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview" style="background:var(--grey1);">
+          <div style="border:2px dashed var(--grey5);padding:20px;border-radius:4px;text-align:center;">
+            <div style="font-size:11px;color:var(--grey7);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Visually Hidden</div>
+            <div style="font-family:monospace;font-size:12px;color:var(--grey9);line-height:1.8;">
+              &lt;div role="status"<br>
+              &nbsp;&nbsp;aria-live="polite"<br>
+              &nbsp;&nbsp;aria-atomic="true"&gt;<br>
+              &nbsp;&nbsp;Settings saved<br>
+              &lt;/div&gt;
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>AccessibilityAnnouncementService</h3>
+          <span class="card-type type-a11y">Accessibility</span>
+          <div class="card-meta">
+            <div>
+              <dt>Priorities</dt>
+              <dd>"polite" (default) and "assertive" (important)</dd>
+            </div>
+            <div>
+              <dt>Options</dt>
+              <dd>Configurable delay and clear-after duration</dd>
+            </div>
+            <div>
+              <dt>Common Uses</dt>
+              <dd>Form saves, errors, calendar actions, page loads, loading states</dd>
+            </div>
+            <div>
+              <dt>Visual</dt>
+              <dd>1px absolute, clipped (screen reader only)</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag">core/accessibility/AccessibilityAnnouncement.service.ts</span>
+        <span class="tag">core/accessibility/AccessibilityAnnouncementRegion.tsx</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== LEGACY ==================== -->
+  <section class="section" id="legacy">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <h2>Legacy &amp; Error Boundaries</h2>
+    </div>
+    <p class="section-desc">Deprecated and structural error-handling components.</p>
+
+    <!-- Legacy Toaster -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div style="background:var(--grey4);padding:12px 16px;border-radius:2px;display:flex;align-items:center;gap:12px;width:100%;">
+            <span style="font-size:14px;color:var(--white);">Operation completed</span>
+            <span style="margin-left:auto;color:var(--grey8);cursor:pointer;">&times;</span>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Legacy Toaster (Angular)</h3>
+          <span class="card-type type-toast">Toast</span> <span class="card-type type-error" style="margin-left:4px;">Deprecated</span>
+          <div class="card-meta">
+            <div>
+              <dt>Framework</dt>
+              <dd>Angular (legacy)</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>Store-based state, auto-dismiss, icon/action support</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>Replaced by Pills toast notification system</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag deprecated">Deprecated</span>
+        <span class="tag">common-components/toaster.component.ts</span>
+      </div>
+    </div>
+
+    <!-- Error Boundaries -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-preview">
+          <div class="mock-modal-wrapper">
+            <div class="mock-modal" style="padding:32px;">
+              <div class="modal-icon" style="background:var(--red2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">&times;</div>
+              <h4 style="font-size:15px;">Something Went Wrong</h4>
+              <p style="font-size:13px;">An unexpected error occurred. Please try refreshing the page.</p>
+              <button class="mock-btn primary" style="width:100%;">Refresh</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-info">
+          <h3>Error Boundaries</h3>
+          <span class="card-type type-error">Error Boundary</span>
+          <div class="card-meta">
+            <div>
+              <dt>Types</dt>
+              <dd>AppErrorBoundary, EmptyErrorBoundary, RetryErrorBoundary, ChartErrorBoundary</dd>
+            </div>
+            <div>
+              <dt>Desktop</dt>
+              <dd>Shows BasicModal, admin-specific error details, Raygun reporting</dd>
+            </div>
+            <div>
+              <dt>Behavior</dt>
+              <dd>Route change resets error state</dd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="label">Source:</span>
+        <span class="tag platform-web">Web</span>
+        <span class="tag platform-desktop">Desktop</span>
+        <span class="tag">ErrorBoundary/</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== RECOMMENDATIONS ==================== -->
+  <section class="section" id="recommendations">
+    <div class="section-header">
+      <div class="section-number">&#9733;</div>
+      <h2>Consolidation Recommendations</h2>
+    </div>
+    <p class="section-desc">Suggestions for reducing fragmentation and improving consistency across platforms.</p>
+
+    <div class="rec-card high">
+      <h4>1. Add Toast/Notification to Chainlink</h4>
+      <div class="rec-priority">High Priority — Biggest Gap</div>
+      <p>Chainlink has <strong>zero toast/notification support</strong>, forcing 3 independent implementations: Web Pills, Desktop Notification (7 variants), Desktop BannerNotification, Mobile Notification, and a legacy Angular Toaster.</p>
+      <ul>
+        <li><strong>Action:</strong> Add a <code>Toast</code> component to <code>@trainerroad/chainlink-dom</code> with variants: default, success, error, info, warning</li>
+        <li><strong>Action:</strong> Include a <code>ToastProvider</code> with queue management, auto-dismiss (5s default), sticky option, and action button support</li>
+        <li><strong>Action:</strong> Match the existing Pills styling (pill shape, 54px height, grey3 bg) as the standard</li>
+        <li><strong>Action:</strong> Remove the legacy Angular Toaster immediately</li>
+        <li><strong>Impact:</strong> Replaces 5 custom implementations with 1 shared component</li>
+      </ul>
+    </div>
+
+    <div class="rec-card high">
+      <h4>2. Add Banner Component to Chainlink</h4>
+      <div class="rec-priority">High Priority — Biggest Gap</div>
+      <p>Banners exist in 5+ unrelated patterns: Web App Banners (3 with priority system), Desktop BannerNotification, InternetBanner, UpdateNotification, and WahooResyncBanner. None come from Chainlink.</p>
+      <ul>
+        <li><strong>Action:</strong> Add a <code>Banner</code> component to Chainlink with variants: info, warning, error, success, promotional</li>
+        <li><strong>Action:</strong> Support props: icon, message, action button, close button, position (top/inline), theme</li>
+        <li><strong>Action:</strong> Port the web priority system to <code>@trainerroad/chainlink-shared</code> as a <code>BannerManager</code></li>
+        <li><strong>Action:</strong> Unify DownloadApps + PublicProfile banners (identical dark style) into single component with props</li>
+        <li><strong>Impact:</strong> One banner pattern instead of 5+ implementations</li>
+      </ul>
+    </div>
+
+    <div class="rec-card high">
+      <h4>3. Add InlineAlert Component to Chainlink</h4>
+      <div class="rec-priority">High Priority — Biggest Gap</div>
+      <p>There are 4+ inline alert components (EstimateTssBanner, AlertBox, ListViewBanner, WorkoutProgressionsBanner) each with different styling, padding (12px vs 16px), and border-radius (2px vs 4px). Chainlink provides nothing here.</p>
+      <ul>
+        <li><strong>Action:</strong> Add an <code>InlineAlert</code> component with variants: info, warning, error, success</li>
+        <li><strong>Action:</strong> Standard props: icon, title, message, closable, actions (button slots)</li>
+        <li><strong>Action:</strong> Use Chainlink's existing theme system (alertThemeModeMap pattern already exists in web)</li>
+        <li><strong>Action:</strong> Standardize on 4px border-radius and 12px padding</li>
+        <li><strong>Impact:</strong> Replaces 4+ custom components across web and desktop</li>
+      </ul>
+    </div>
+
+    <div class="rec-card high">
+      <h4>4. Unify Modal Systems onto Chainlink</h4>
+      <div class="rec-priority">High Priority</div>
+      <p>Chainlink provides Modal + BasicModal, but apps still maintain <strong>5 additional modal implementations</strong>: Legacy ModalService (web), Legacy Modal (desktop), SimpleModal, SidePanelModal, and FullscreenModal.</p>
+      <ul>
+        <li><strong>Action:</strong> Fully deprecate Legacy ModalService (web) and Legacy Modal (desktop) — migrate all usages to Chainlink BasicModal</li>
+        <li><strong>Action:</strong> FullscreenModal already maps to Chainlink's <code>fullscreen</code> variant — remove the custom component</li>
+        <li><strong>Action:</strong> Replace SimpleModal usages with Chainlink Modal</li>
+        <li><strong>Action:</strong> Add a <code>ConfirmationDialog</code> preset to BasicModal with destructive/non-destructive styling</li>
+        <li><strong>Impact:</strong> Reduces 6 modal systems to 1 (Chainlink) + SidePanelModal for panel context</li>
+      </ul>
+    </div>
+
+    <div class="rec-card medium">
+      <h4>5. Add Drawer/SidePanel to Chainlink</h4>
+      <div class="rec-priority">Medium Priority</div>
+      <p>Both web (Drawer system, z-9998) and desktop (SidePanel, 3 sizes) have independent side panel implementations. This is a common pattern that belongs in the design system.</p>
+      <ul>
+        <li><strong>Action:</strong> Add a <code>Drawer</code> component with sizes: small (160px), medium (320px), large (480px)</li>
+        <li><strong>Action:</strong> Support: header/footer slots, backdrop dismiss, ESC close, RTL, animation (150ms slide-in)</li>
+        <li><strong>Action:</strong> Include a <code>DrawerConfirmation</code> sub-component for the common confirm-in-drawer pattern</li>
+        <li><strong>Impact:</strong> Replaces 2 independent implementations with 1 shared component</li>
+      </ul>
+    </div>
+
+    <div class="rec-card medium">
+      <h4>6. Add PageError + SaveMessage to Chainlink</h4>
+      <div class="rec-priority">Medium Priority</div>
+      <p>ErrorMessage, PageErrorMessage, SaveMessage, and Notification (green bar) all exist as custom components in <strong>both</strong> web and desktop — SaveMessage is literally duplicated across repos. Chainlink only covers field-level errors.</p>
+      <ul>
+        <li><strong>Action:</strong> Add a <code>PageErrorMessage</code> component (icon + message, themed for light/dark)</li>
+        <li><strong>Action:</strong> Add a <code>SaveMessage</code> component (green checkmark + "Saved" text, with fade animation)</li>
+        <li><strong>Action:</strong> Standardize error colors using Chainlink's existing <code>error</code>/<code>errorDark</code> tokens</li>
+        <li><strong>Impact:</strong> Eliminates duplicated components across repos</li>
+      </ul>
+    </div>
+
+    <div class="rec-card medium">
+      <h4>7. Add Accessibility Live Region to Chainlink</h4>
+      <div class="rec-priority">Medium Priority</div>
+      <p>Web has AccessibilityAnnouncementService for screen reader alerts; desktop and mobile have nothing. This is a cross-cutting concern that should be standard.</p>
+      <ul>
+        <li><strong>Action:</strong> Add an <code>AccessibilityAnnouncement</code> provider to Chainlink with polite/assertive priorities</li>
+        <li><strong>Action:</strong> Auto-integrate with Toast and Modal components (announce on show)</li>
+        <li><strong>Action:</strong> All new Chainlink alert components should include proper aria-live attributes</li>
+        <li><strong>Impact:</strong> Consistent accessibility across all 3 platforms</li>
+      </ul>
+    </div>
+
+    <div class="rec-card low">
+      <h4>8. Align Animation Patterns via Chainlink Tokens</h4>
+      <div class="rec-priority">Low Priority</div>
+      <p>Animation durations vary: 150ms, 200ms, 300ms, 400ms, 1000ms with different easing. Chainlink defines some (200ms modal, 300ms tooltip) but apps don't follow them consistently. Three different animation libraries are in use (react-pose, react-spring, CSS).</p>
+      <ul>
+        <li><strong>Action:</strong> Export animation duration/easing tokens from <code>@trainerroad/chainlink-shared</code></li>
+        <li><strong>Action:</strong> Standard durations: 150ms (micro), 200ms (feedback), 300ms (overlay)</li>
+        <li><strong>Action:</strong> Migrate from deprecated react-pose to CSS transitions</li>
+      </ul>
+    </div>
+
+    <div class="rec-card low">
+      <h4>9. Mobile Parity</h4>
+      <div class="rec-priority">Low Priority</div>
+      <p>Mobile has only 2 notification variants (success/error) while desktop has 7. Mobile lacks inline alerts and status indicators entirely.</p>
+      <ul>
+        <li><strong>Action:</strong> Once Toast and InlineAlert exist in Chainlink, create <code>@trainerroad/chainlink-native</code> equivalents</li>
+        <li><strong>Action:</strong> Add warning and info variants to mobile Notification at minimum</li>
+        <li><strong>Action:</strong> Ensure shared modals (RedDay, AI FTP, Adapt) have consistent behavior across platforms</li>
+      </ul>
+    </div>
+
+    <!-- Summary box -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px;margin-top:32px;">
+      <h3 style="color:var(--white);margin-bottom:16px;">Consolidation Summary — Chainlink Expansion Plan</h3>
+      <table class="summary-table" style="margin-bottom:0;">
+        <thead>
+          <tr>
+            <th>Area</th>
+            <th>Chainlink Today</th>
+            <th>Custom App Code</th>
+            <th>Add to Chainlink</th>
+            <th>Reduction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Modal Systems</td>
+            <td style="color:var(--green);">Modal + BasicModal</td>
+            <td>5 extra (Legacy, Simple, Fullscreen, SidePanel, Mobile)</td>
+            <td>ConfirmationDialog preset</td>
+            <td style="color:var(--green);">6 &rarr; 2 (-67%)</td>
+          </tr>
+          <tr>
+            <td>Toast/Notification</td>
+            <td style="color:var(--red5);">Nothing</td>
+            <td>5 systems (Pills, Notif, BannerNotif, Mobile, Angular)</td>
+            <td style="font-weight:600;color:var(--yellow1);">Toast + ToastProvider</td>
+            <td style="color:var(--green);">5 &rarr; 1 (-80%)</td>
+          </tr>
+          <tr>
+            <td>Banner Components</td>
+            <td style="color:var(--red5);">Nothing</td>
+            <td>6+ banners across web + desktop</td>
+            <td style="font-weight:600;color:var(--yellow1);">Banner + BannerManager</td>
+            <td style="color:var(--green);">6 &rarr; 1 (-83%)</td>
+          </tr>
+          <tr>
+            <td>Inline Alerts</td>
+            <td style="color:var(--red5);">Nothing</td>
+            <td>4+ components (EstimateTss, AlertBox, etc.)</td>
+            <td style="font-weight:600;color:var(--yellow1);">InlineAlert</td>
+            <td style="color:var(--green);">4 &rarr; 1 (-75%)</td>
+          </tr>
+          <tr>
+            <td>Error Displays</td>
+            <td style="color:var(--green);">FormErrorMessage</td>
+            <td>4 extra (ErrorMessage, PageError, ErrorWrapper, etc.)</td>
+            <td style="font-weight:600;color:var(--yellow1);">PageErrorMessage</td>
+            <td style="color:var(--green);">5 &rarr; 2 (-60%)</td>
+          </tr>
+          <tr>
+            <td>Drawer / Side Panel</td>
+            <td style="color:var(--red5);">Nothing</td>
+            <td>2 systems (Web Drawer + Desktop SidePanel)</td>
+            <td style="font-weight:600;color:var(--yellow1);">Drawer</td>
+            <td style="color:var(--green);">2 &rarr; 1 (-50%)</td>
+          </tr>
+          <tr>
+            <td>Save Confirmation</td>
+            <td style="color:var(--red5);">Nothing</td>
+            <td>2 duplicated SaveMessage components</td>
+            <td style="font-weight:600;color:var(--yellow1);">SaveMessage</td>
+            <td style="color:var(--green);">2 &rarr; 1 (-50%)</td>
+          </tr>
+          <tr>
+            <td>Accessibility</td>
+            <td style="color:var(--red5);">Nothing</td>
+            <td>1 (Web only AccessibilityAnnouncement)</td>
+            <td style="font-weight:600;color:var(--yellow1);">A11yAnnouncement</td>
+            <td style="color:var(--green);">1 &rarr; shared</td>
+          </tr>
+          <tr style="border-top:2px solid var(--grey5);">
+            <td><strong>Total</strong></td>
+            <td><strong style="color:var(--green);">3 components</strong></td>
+            <td><strong>35+ custom</strong></td>
+            <td><strong style="color:var(--yellow1);">+8 new Chainlink components</strong></td>
+            <td style="color:var(--green);font-weight:700;">38 &rarr; ~11 (-71%)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<style>
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+</body>
+</html>
